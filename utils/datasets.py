@@ -313,8 +313,6 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             raise Exception('Error loading data from %s: %s\nSee %s' % (path, e, help_url))
 
         n = len(self.img_files)
-        print('LOG' + str(os.listdir(path)))
-        print('LOG' + str(os.listdir))
         assert n > 0, 'No images found in %s. See %s' % (path, help_url)
         bi = np.floor(np.arange(n) / batch_size).astype(np.int)  # batch index
         nb = bi[-1] + 1  # number of batches
