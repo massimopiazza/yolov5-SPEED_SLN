@@ -28,7 +28,7 @@ def detect(save_img=False):
     device = select_device(opt.device)
     if os.path.exists(out):
         shutil.rmtree(out)  # delete output folder
-    os.makedirs(out)  # make new output folder
+    os.makedirs(out)  # create new output folder
     half = device.type != 'cpu'  # half precision only supported on CUDA
 
     # Load model
