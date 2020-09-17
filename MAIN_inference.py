@@ -38,7 +38,14 @@ from utils.general import (
     xyxy2xywh, plot_one_box, strip_optimizer, set_logging)
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 
-from utils_SPEED import *
+# import module from parent of parent dir
+# import module from parent of parent dir
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir_1 = os.path.dirname(current_dir)
+parent_dir_2 = os.path.dirname(parent_dir_1)
+sys.path.insert(0, parent_dir_2)
+from utils_various import *
 
 
 homeDir = os.path.expanduser("~")
@@ -186,12 +193,14 @@ def detect_ROI(source='inference/images/', Opt=Opt):
             img = img.unsqueeze(0) # (W,H,C) --> (1,W,H,C)
 
         # Inference
-        t1 = time_synchronized()
+        t0 = time.time()
         pred = model(img, augment=Opt.augment)[0]
 
         # Apply NMS
         pred = non_max_suppression(pred, Opt.conf_thres, Opt.iou_thres, classes=Opt.classes, agnostic=Opt.agnostic_nms)
-        t2 = time_synchronized()
+
+        runtime = time.time() - t0
+
 
         # loop over detections
         for i, det in enumerate(pred):  # detections per image
@@ -214,7 +223,11 @@ def detect_ROI(source='inference/images/', Opt=Opt):
                 xyxy_norm = npa(xyxy) / npa([img_orig.w, img_orig.h, img_orig.w, img_orig.h])
 
         if pred[0] is None:  # i.e. FAILED detection
-            xyxy_norm = npa([0, 0, 0, 0])  # so as to result in zero IoU
+            # If nothing is detected by YOLO, Landmark Regression Network
+            # must then process entire image.
+            # As of when writing this comment: img008758, 008808, 012647
+            # have been identified as critical, i.e. no BB detected
+            xyxy_norm = npa([0, 0, Camera.nu, Camera.nv])
             probabilities.append(0)
             img_ROI = OriginalImage(path).get_image()
             warnings.warn('No BB detected in %s' % path)
@@ -240,13 +253,8 @@ def detect_ROI(source='inference/images/', Opt=Opt):
     #       label = '%s %.2f' % (names[int(cls)], conf)
     #       plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
 
-        # Print time (inference + NMS)
-        print('(Inference + NMS: %.3fs)' % (t2 - t1))
 
-
-    print('Done. (%.3fs)' % (time.time() - t0))
-
-    return xyxy_norm_matr, probabilities
+    return xyxy_norm_matr, probabilities, runtime
 
 ## RUN INFERENCE
 
@@ -260,12 +268,13 @@ model = attempt_load(Opt.weights, map_location=device)  # load FP32 model
 
 
 ## Inference on a few EXAMPLES
-img_dir = 'inference/images/'
-Opt.save_crop = True
-detect_ROI(source=img_dir, Opt=Opt)
+if False:
+    img_dir = 'inference/images/'
+    Opt.save_crop = True
+    detect_ROI(source=img_dir, Opt=Opt)
 
 ## Inference on entire TEST set, to save and visualize cropped RoI
-if True:
+if False:
     img_dir = os.path.join(mySPEED_dir, 'images', 'test')
     Opt.save_crop = True
     detect_ROI(source=img_dir, Opt=Opt)
@@ -289,9 +298,9 @@ with open('../../sharedData/test.json') as jFile:
 #     return count
 
 iou_test = []
-prob = []
-
-for img in jData:
+prob_test = []
+inference_data = []
+for idx,img in enumerate(jData):
 
     # True BB label
     bb_true = img['bounding_box']
@@ -302,22 +311,34 @@ for img in jData:
 
     # BB inference
     img_dir = os.path.join(mySPEED_dir, 'images', 'test', img['filename'])
-    xyxy_norm_inf, confidence = detect_ROI(source=img_dir, Opt=Opt)
+    xyxy_norm_inf, confidence, runtime = detect_ROI(source=img_dir, Opt=Opt)
+
+    xyxy_inf = npa(xyxy_norm_inf * [Camera.nu, Camera.nv, Camera.nu, Camera.nv], dtype=int)
+    inference_data.append({'image' : img['filename'],
+                           'box' : xyxy_inf.tolist(),
+                           'runtime' : runtime
+                           })
+    print('\nBB inference on %i/%i: %.4f s' % (idx, len(jData), runtime))
+
 
     # Compute IoU
     iou_test.append( iou(xyxy_norm_true, xyxy_norm_inf) )
 
-    prob.append(confidence[0])
+    prob_test.append(confidence[0])
 
+# save BB predictions (inference on whole test set)
+with open('../../sharedData/' + 'yolov5_inference' + '.json', 'w') as fp:
+    json.dump(inference_data, fp)
 
-# save IoU of individual test images
+# save IoU and confidence of individual test images
 myDict = {
     'iou': iou_test,
-    'probabilities': prob
+    'probabilities': prob_test
 }
-with open('../../sharedData/' + 'yolo_test_performance' + '.json', 'w') as fp:
+with open('../../sharedData/' + 'yolov5_test_performance' + '.json', 'w') as fp:
     json.dump(myDict, fp)
 
+# save predicted
 
 
 ## LOAD INFERENCE RESULTS ON TEST DATA AND COMPUTE AP_50_95
@@ -341,7 +362,7 @@ def ap_at_iou(iou_vec, prob_vec, iou_min):
     is_iou_enough = (iou_vec >= iou_min)
     for score in prob_vec:
         TP = sum(np.logical_and((prob_vec >= score), is_iou_enough))
-        # Alternatively:  sum((prob >= score) * (iou >= iou_min))
+        # Alternatively:  sum((prob_test >= score) * (iou >= iou_min))
         # i.e. sum of a vector having entry = 1 only if True * True
 
         FP = sum(np.logical_and((prob_vec >= score), np.invert(is_iou_enough)))  # False Positives
