@@ -1,8 +1,8 @@
-weights: yolov5s.pt
+weights: model_best_YOLOv5s.pt
 cfg: ./models/yolov5s.yaml
 data: ./data/speed_mp.yml
 hyp: data/hyp.finetune.yaml
-epochs: 100
+epochs: 120
 batch_size: 48
 img_size:
 - 416

@@ -224,10 +224,16 @@ def detect_ROI(source='inference/images/', Opt=Opt):
 
         if pred[0] is None:  # i.e. FAILED detection
             # If nothing is detected by YOLO, Landmark Regression Network
-            # must then process entire image.
+            # should in principle process the entire image, but given that such
+            # a failure would expectedly occur only in the event of a very small
+            # target, then we just "hope" the target is located inside the 40%
+            # center rectangle of the frame. If we were to process the entire image,
+            # it is very likely thar LRN would fail at detecting landmarks from a very
+            # small target from an image that also gets downscaled to 260 x 416 pixels.
+
             # As of when writing this comment: img008758, 008808, 012647
             # have been identified as critical, i.e. no BB detected
-            xyxy_norm = npa([0, 0, Camera.nu, Camera.nv])
+            xyxy_norm = npa([0.3*Camera.nu, 0.3*Camera.nv, 0.4*Camera.nu, 0.4*Camera.nv])
             probabilities.append(0)
             img_ROI = OriginalImage(path).get_image()
             warnings.warn('No BB detected in %s' % path)
@@ -318,7 +324,8 @@ for idx,img in enumerate(jData):
                            'box' : xyxy_inf.tolist(),
                            'runtime' : runtime
                            })
-    print('\nBB inference on %i/%i: %.4f s' % (idx, len(jData), runtime))
+    if not idx % 10:
+        print('\nBB inference on %i/%i images' % (idx, len(jData)))
 
 
     # Compute IoU
@@ -344,7 +351,7 @@ with open('../../sharedData/' + 'yolov5_test_performance' + '.json', 'w') as fp:
 ## LOAD INFERENCE RESULTS ON TEST DATA AND COMPUTE AP_50_95
 
 # Load performance results on test set
-with open('../../sharedData/yolo_test_performance.json') as jFile:
+with open('../../sharedData/yolov5_test_performance.json') as jFile:
     myDict = json.load(jFile)
 iou_test = npa(myDict['iou']).squeeze()
 prob_test = npa(myDict['probabilities']).squeeze()
@@ -388,7 +395,6 @@ def ap_at_iou(iou_vec, prob_vec, iou_min):
 
 
 
-
 def ap_50_95(iou_vec, prob_vec):
 
     IoU_tresholds = np.arange(0.5,1.0,0.05)
@@ -413,15 +419,14 @@ def ap_50_95(iou_vec, prob_vec):
 
 AP_50_95, P_50_95, R_50_95, F1_50_95 = ap_50_95(iou_test, prob_test)
 
-# Save performance parameters
-with open('../../sharedData/yolo_test_performance.json') as jFile:
-    myDict = json.load(jFile)
 
 myDict['ap_50_95'] = AP_50_95.tolist()
 myDict['p_50_95']  = P_50_95.tolist()
 myDict['r_50_95']  = R_50_95.tolist()
 myDict['f1_50_95'] = F1_50_95.tolist()
-with open('../../sharedData/' + 'yolo_test_performance' + '.json', 'w') as fp:
+
+# Save performance parameters
+with open('../../sharedData/' + 'yolov5_test_performance' + '.json', 'w') as fp:
     json.dump(myDict, fp)
 
 
@@ -430,7 +435,7 @@ with open('../../sharedData/' + 'yolo_test_performance' + '.json', 'w') as fp:
 ## Plot inference performance: P(R) curves
 
 
-with open('../../sharedData/yolo_test_performance.json') as jFile:
+with open('../../sharedData/yolov5_test_performance.json') as jFile:
     jData = json.load(jFile)
 AP_50_95, P_50_95, R_50_95, F1_50_95 = npa(jData['ap_50_95']), npa(jData['p_50_95']), npa(jData['r_50_95']), npa(jData['f1_50_95'])
 
