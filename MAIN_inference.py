@@ -32,7 +32,7 @@ from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 
 
 from models.experimental import attempt_load
-from utils.datasets import LoadStreams, LoadImages
+from utils.datasets import LoadStreams, LoadImages, letterbox
 from utils.general import (
     check_img_size, non_max_suppression, apply_classifier, scale_coords,
     xyxy2xywh, plot_one_box, strip_optimizer, set_logging)
@@ -72,6 +72,11 @@ class Opt:
     save_out     = False  # i.e. draw BB in original image and save
 
 
+# Used in case of failure of the first SC localization attempt
+# (this will be quite a rare event, after proper training)
+crop_factor = 0.4  # --> center rectangle with sides @ 40% of original image
+crop_xyxy = npa([(1 - crop_factor) / 2 * Camera.nu, (1 - crop_factor) / 2 * Camera.nv,
+                 (.5 + crop_factor / 2) * Camera.nu, (.5 + crop_factor / 2) * Camera.nv], dtype=int)
 
 class OriginalImage:
 
@@ -194,12 +199,74 @@ def detect_ROI(source='inference/images/', Opt=Opt):
 
         # Inference
         t0 = time.time()
-        pred = model(img, augment=Opt.augment)[0]
+        pred = model(img, augment=Opt.augment)[0]  # raw prediction (i.e. before NMS)
 
         # Apply NMS
         pred = non_max_suppression(pred, Opt.conf_thres, Opt.iou_thres, classes=Opt.classes, agnostic=Opt.agnostic_nms)
 
+        detection_from_center_crop = False
+        if pred[0] is None:  # i.e. FAILED detection
+            detection_from_center_crop = True  # Need to flag this to properly recover prediction coords
+            # When writing this comment: img008758, 008808, 012647
+            # have been identified as critical, i.e. no BB detected
+
+            # First of all we try analyzing the 40% center-crop rectangle,
+            # then if needed we also try reducing the confidence threshold
+            # that filters out all low confidence prediction, before applying NMS.
+            # Threshold confidence is progressively reduced from the initial value
+            # down to 0.4 (at most) until a detection is obtained.
+
+            # Read image
+            img = cv2.imread(path)  # BGR @ numpy:(H,W,C)
+            img = img[crop_xyxy[1]:crop_xyxy[3],
+                      crop_xyxy[0]:crop_xyxy[2],:]
+            crop_after_fail_shape = img.shape  # this is needed for proper coordinate scaling
+
+            # Padded resize
+            img = letterbox(img, new_shape=Opt.img_size)[0]
+            # Convert
+            img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB @ numpy:(3x416x416)
+            img = np.ascontiguousarray(img)
+
+
+            img = torch.from_numpy(img).to(device)  # PIL --> numpy --> torch
+            img = img.half() if half else img.float()  # uint8 to fp16/32
+            img /= 255.0  # 0 - 255 to 0.0 - 1.0
+            if img.ndimension() == 3:
+                img = img.unsqueeze(0)  # (W,H,C) --> (1,W,H,C)
+
+            # Inference
+            pred = model(img, augment=Opt.augment)[0]  # raw prediction (i.e. before NMS)
+            # NMS
+            pred = non_max_suppression(pred, Opt.conf_thres, Opt.iou_thres, classes=Opt.classes,
+                                       agnostic=Opt.agnostic_nms)
+
+            lower_thresholds = np.arange(Opt.conf_thres-.1, .3, -.1)
+            count = -1
+            while pred[0] is None:
+                count += 1
+                pred = non_max_suppression(pred, lower_thresholds[count], Opt.iou_thres,
+                                           classes=Opt.classes, agnostic=Opt.agnostic_nms)
+
+            # If there is still no detection by YOLO, Landmark Regression Network
+            # should in principle process the entire image, but given that such
+            # a failure would expectedly occur only in the event of a very small
+            # target, then we just "hope" the target is located inside the 30%
+            # center rectangle of the frame. If we were to process the entire image,
+            # it is very likely thar LRN would fail at detecting landmarks from a very
+            # small target from an image that also gets downscaled to 260 x 416 pixels.
+            if pred[0] is None:
+                xyxy_norm = npa([0.35 * Camera.nu, 0.35 * Camera.nv, 0.3 * Camera.nu, 0.3 * Camera.nv])
+                probabilities.append(0)
+                warnings.warn('No BB detected in %s, we just hope SC is inside xyxy-box: %s'
+                              % (path, str(xyxy_norm)))
+                if show_crop or save_crop:
+                    img_ROI = OriginalImage(path).get_image()  # entire original image
+
+
+
         runtime = time.time() - t0
+
 
 
         # loop over detections
@@ -208,7 +275,11 @@ def detect_ROI(source='inference/images/', Opt=Opt):
             # gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             if det is not None and len(det):
                 # Rescale boxes from img_size to im0 size
-                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0s.shape).round()
+                if detection_from_center_crop:
+                    ref_shape_scale = crop_after_fail_shape
+                else:
+                    ref_shape_scale = im0s.shape
+                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], ref_shape_scale).round()
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
@@ -216,27 +287,22 @@ def detect_ROI(source='inference/images/', Opt=Opt):
                     xyxy = torch.tensor(xyxy).tolist()
                     conf = torch.tensor(conf).tolist()
 
+                    if detection_from_center_crop:  # if detection initially failed, but our previous zoom-in strategy
+                                                    # was successful (i.e. pred != None), then we need to transform the
+                                                    # coordinates of BB-prediction @ cropped to coordinates @ full-image
+                        xyxy = (npa(xyxy) + npa([crop_xyxy[0], crop_xyxy[1], crop_xyxy[0], crop_xyxy[1]])).tolist()
+                    if len(det) > 1:
+                        print('%i DETECTIONS:' % len(det))
+                        print(path, conf, xyxy)
+
+
                 img_orig = OriginalImage(path)
-                img_ROI = img_orig.get_cropped_ROI(xyxy)
+                if show_crop or save_crop:
+                    img_ROI = img_orig.get_cropped_ROI(xyxy)
 
                 probabilities.append(conf)
                 xyxy_norm = npa(xyxy) / npa([img_orig.w, img_orig.h, img_orig.w, img_orig.h])
 
-        if pred[0] is None:  # i.e. FAILED detection
-            # If nothing is detected by YOLO, Landmark Regression Network
-            # should in principle process the entire image, but given that such
-            # a failure would expectedly occur only in the event of a very small
-            # target, then we just "hope" the target is located inside the 40%
-            # center rectangle of the frame. If we were to process the entire image,
-            # it is very likely thar LRN would fail at detecting landmarks from a very
-            # small target from an image that also gets downscaled to 260 x 416 pixels.
-
-            # As of when writing this comment: img008758, 008808, 012647
-            # have been identified as critical, i.e. no BB detected
-            xyxy_norm = npa([0.3*Camera.nu, 0.3*Camera.nv, 0.4*Camera.nu, 0.4*Camera.nv])
-            probabilities.append(0)
-            img_ROI = OriginalImage(path).get_image()
-            warnings.warn('No BB detected in %s' % path)
 
         # Stack BB predictions
         if len(xyxy_norm_matr) > 0:
@@ -307,7 +373,6 @@ iou_test = []
 prob_test = []
 inference_data = []
 for idx,img in enumerate(jData):
-
     # True BB label
     bb_true = img['bounding_box']
     TL = bb_true['TL']
@@ -325,7 +390,7 @@ for idx,img in enumerate(jData):
                            'runtime' : runtime
                            })
     if not idx % 10:
-        print('\nBB inference on %i/%i images' % (idx, len(jData)))
+        print('BB inference on %i/%i images' % (idx, len(jData)), end='\r')
 
 
     # Compute IoU
@@ -417,7 +482,13 @@ def ap_50_95(iou_vec, prob_vec):
 
 
 
+# Compute performance metrics
+IoU_mean = np.mean(iou_test)
+IoU_median = np.median(iou_test)
 AP_50_95, P_50_95, R_50_95, F1_50_95 = ap_50_95(iou_test, prob_test)
+print('YOLOv5 PERFORMANCE ON TEST SET:')
+print('AP_50-95 = %.4f\tIoU_mean = %.4f\tIoU_median = %.4f'
+      % (AP_50_95, IoU_mean, IoU_median))
 
 
 myDict['ap_50_95'] = AP_50_95.tolist()
@@ -470,13 +541,13 @@ axins.set_ylim(y1, y2)
 axins.set_xticklabels('')
 axins.set_yticklabels('')
 # connect the inset axes and the area in the parent axes
-mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="0.7")
+mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="0.7", alpha=0.65)
 
 # place a text box in upper left in axes coords
-props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-AP_percent = AP_50_95*100
-ax.text(0.1, 0.87,
-        'AP$_{50}^{95} = %.3f$ %%' % AP_percent,
+props = dict(boxstyle='round', facecolor='navajowhite', alpha=0.5)
+ax.text(0.52, 0.86,
+        'AP$_{50}^{95} = %.2f$ %%\nIoU$_\mathrm{mean} = %.2f$ %%\nIoU$_\mathrm{median} = %.2f$ %%'
+        % (AP_50_95*100, IoU_mean*100, IoU_median*100),
         transform=ax.transAxes, fontsize=14,
         verticalalignment='top', bbox=props)
 
