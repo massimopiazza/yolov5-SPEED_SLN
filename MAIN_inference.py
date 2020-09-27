@@ -48,10 +48,7 @@ sys.path.insert(0, parent_dir_2)
 from utils_various import *
 
 
-homeDir = os.path.expanduser("~")
-originalSPEED_dir = homeDir + '/SPEED'
-mySPEED_dir = homeDir + '/SPEED_MP'
-
+output_dir = '../06 Output'
 
 class Opt:
     agnostic_nms = False
@@ -551,7 +548,7 @@ ax.text(0.52, 0.86,
         transform=ax.transAxes, fontsize=14,
         verticalalignment='top', bbox=props)
 
-plt.savefig(os.path.join('../output/' + 'prec_recall_50_95' + '.pdf'),
+plt.savefig(os.path.join(output_dir, 'YOLO', 'prec_recall_50_95' + '.pdf'),
             bbox_inches='tight')
 
 
