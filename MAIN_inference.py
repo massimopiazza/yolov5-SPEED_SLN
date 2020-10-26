@@ -48,7 +48,7 @@ sys.path.insert(0, parent_dir_2)
 from utils_various import *
 
 
-output_dir = '../06 Output'
+output_dir = '../../06 Output'
 
 class Opt:
     agnostic_nms = False
