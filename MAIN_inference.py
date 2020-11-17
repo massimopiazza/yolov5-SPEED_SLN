@@ -114,8 +114,8 @@ def main():
 if __name__ == '__main__':
     TEST_LABELS_DIR, TEST_IMAGES_DIR = main()
 
-TEST_LABELS_DIR = '../../sharedData/rendezvous_labels.json'
-TEST_IMAGES_DIR = '../../Rendering/rendezvous_render/frames/movie'
+# TEST_LABELS_DIR = '../../sharedData/rendezvous_labels.json'
+# TEST_IMAGES_DIR = '../../Rendering/rendezvous_render/frames/movie'
 
 # Load JSON file with labels of original test set
 with open(TEST_LABELS_DIR) as jFile:
@@ -484,7 +484,7 @@ Opt.save_crop = False
 iou_test = []
 prob_test = []
 inference_data = []
-for idx,img in enumerate(test_labels[270:290]):
+for idx,img in enumerate(test_labels):
     # True BB label
     bb_true = img['bounding_box']
     TL = bb_true['TL']
