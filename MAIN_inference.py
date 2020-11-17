@@ -91,6 +91,8 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
+
 def main():
     args = parse_args()
 
@@ -106,13 +108,20 @@ def main():
         # Default directory
         TEST_IMAGES_DIR = os.path.join(mySPEED_dir, 'images', 'test')
 
-    # Load JSON file with labels of original test set
-    with open(TEST_LABELS_DIR) as jFile:
-        test_labels = json.load(jFile)
+    return TEST_LABELS_DIR, TEST_IMAGES_DIR
 
 
 if __name__ == '__main__':
-    main()
+    TEST_LABELS_DIR, TEST_IMAGES_DIR = main()
+
+
+# Load JSON file with labels of original test set
+with open(TEST_LABELS_DIR) as jFile:
+    test_labels = json.load(jFile)
+
+
+
+
 
 class OriginalImage:
 
@@ -371,6 +380,7 @@ def detect_ROI(source='inference/images/', Opt=Opt):
 
 
     return xyxy_norm_matr, probabilities, runtime
+
 
 ## RUN INFERENCE
 
