@@ -96,7 +96,7 @@ def main():
 
     if args.labels_dir:
         TEST_LABELS_DIR = args.labels_dir
-    else
+    else:
         # Default directory
         TEST_LABELS_DIR = '../../sharedData/test.json'
 
@@ -105,6 +105,10 @@ def main():
     else:
         # Default directory
         TEST_IMAGES_DIR = os.path.join(mySPEED_dir, 'images', 'test')
+
+    # Load JSON file with labels of original test set
+    with open(TEST_LABELS_DIR) as jFile:
+        test_labels = json.load(jFile)
 
 
 if __name__ == '__main__':
@@ -455,11 +459,6 @@ if False:
 
 Opt.save_crop = False
 
-# Load JSON file with labels of original test set
-with open(TEST_LABELS_DIR) as jFile:
-    jData = json.load(jFile)
-
-
 # def get_idx_from_filename(filename, data):
 #     count = 0
 #     for item in data:
@@ -471,7 +470,7 @@ with open(TEST_LABELS_DIR) as jFile:
 iou_test = []
 prob_test = []
 inference_data = []
-for idx,img in enumerate(jData):
+for idx,img in enumerate(test_labels):
     # True BB label
     bb_true = img['bounding_box']
     TL = bb_true['TL']
@@ -489,7 +488,7 @@ for idx,img in enumerate(jData):
                            'runtime' : runtime
                            })
     if not idx % 10:
-        print('BB inference on %i/%i images' % (idx, len(jData)), end='\r')
+        print('BB inference on %i/%i images' % (idx, len(test_labels)), end='\r')
 
 
     # Compute IoU
@@ -605,8 +604,8 @@ with open('../../sharedData/' + 'yolov5_test_performance' + '.json', 'w') as fp:
 
 
 with open('../../sharedData/yolov5_test_performance.json') as jFile:
-    jData = json.load(jFile)
-AP_50_95, P_50_95, R_50_95, F1_50_95 = npa(jData['ap_50_95']), npa(jData['p_50_95']), npa(jData['r_50_95']), npa(jData['f1_50_95'])
+    test_labels = json.load(jFile)
+AP_50_95, P_50_95, R_50_95, F1_50_95 = npa(test_labels['ap_50_95']), npa(test_labels['p_50_95']), npa(test_labels['r_50_95']), npa(test_labels['f1_50_95'])
 
 plt.figure(figsize=(8.5,4.9))  # get current size: ax.figure.get_size_inches()
 plt.title('Test set performance')
