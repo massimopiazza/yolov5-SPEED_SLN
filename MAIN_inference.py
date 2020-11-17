@@ -49,11 +49,6 @@ from utils_various import *
 
 output_dir = '../../06 Output'
 
-# Default directories
-TEST_IMAGES_DIR = os.path.join(mySPEED_dir, 'images', 'test')
-TEST_LABELS_DIR = '../../sharedData/test.json'
-
-
 class Opt:
     agnostic_nms = False
     augment      = False
@@ -101,9 +96,15 @@ def main():
 
     if args.labels_dir:
         TEST_LABELS_DIR = args.labels_dir
+    else
+        # Default directory
+        TEST_LABELS_DIR = '../../sharedData/test.json'
 
     if args.images_dir:
         TEST_IMAGES_DIR = args.images_dir
+    else:
+        # Default directory
+        TEST_IMAGES_DIR = os.path.join(mySPEED_dir, 'images', 'test')
 
 
 if __name__ == '__main__':
