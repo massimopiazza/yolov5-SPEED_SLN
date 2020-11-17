@@ -974,18 +974,21 @@ def butter_lowpass_filtfilt(data, cutoff=1500, fs=50000, order=5):
     return filtfilt(b, a, data)  # forward-backward filter
 
 
-def plot_one_box(x, img, color=None, label=None, line_thickness=None):
+def plot_one_box(xyxy, img, color=None, label=None, line_thickness=None):
     # Plots one bounding box on image img
     tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
     color = color or [random.randint(0, 255) for _ in range(3)]
-    c1, c2 = (int(x[0]), int(x[1])), (int(x[2]), int(x[3]))
+    c1, c2 = (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3]))
     cv2.rectangle(img, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
     if label:
-        tf = max(tl - 1, 1)  # font thickness
-        t_size = cv2.getTextSize(label, 0, fontScale=tl / 3, thickness=tf)[0]
-        c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
-        cv2.rectangle(img, c1, c2, color, -1, cv2.LINE_AA)  # filled
-        cv2.putText(img, label, (c1[0], c1[1] - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
+        tf = max(tl - 1, 4)  # font thickness
+        font_scale = 0.8 * tl
+        t_size = cv2.getTextSize(label, 0, fontScale=font_scale, thickness=tf)[0]
+        # c2 = c1[0] + t_size[0], c1[1] + t_size[1] + tl
+        h_label = int(font_scale*30)
+        w_label = int(font_scale*100)
+        cv2.rectangle(img, (0,0), (w_label,h_label), color, -1, cv2.LINE_AA)  # filled
+        cv2.putText(img, label, (10,h_label-10), 0, font_scale, [0,0,0], thickness=tf, lineType=cv2.LINE_AA)
 
 
 def plot_wh_methods():  # from utils.general import *; plot_wh_methods()
@@ -1073,7 +1076,7 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
                 cls = names[cls] if names else cls
                 if gt or conf[j] > 0.3:  # 0.3 conf thresh
                     label = '%s' % cls if gt else '%s %.1f' % (cls, conf[j])
-                    plot_one_box(box, mosaic, label=label, color=color, line_thickness=tl)
+                    plot_one_box(box, mosaic, color=color, label=label, line_thickness=tl)
 
         # Draw image filename labels
         if paths is not None:

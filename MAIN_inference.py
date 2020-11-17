@@ -39,7 +39,6 @@ from utils.general import (
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 # import module from parent of parent dir
-# import module from parent of parent dir
 import os,sys,inspect
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir_1 = os.path.dirname(current_dir)
@@ -49,6 +48,11 @@ from utils_various import *
 
 
 output_dir = '../../06 Output'
+
+# Default directories
+TEST_IMAGES_DIR = os.path.join(mySPEED_dir, 'images', 'test')
+TEST_LABELS_DIR = '../../sharedData/test.json'
+
 
 class Opt:
     agnostic_nms = False
@@ -74,6 +78,36 @@ class Opt:
 crop_factor = 0.4  # --> center rectangle with sides @ 40% of original image
 crop_xyxy = npa([(1 - crop_factor) / 2 * Camera.nu, (1 - crop_factor) / 2 * Camera.nv,
                  (.5 + crop_factor / 2) * Camera.nu, (.5 + crop_factor / 2) * Camera.nv], dtype=int)
+
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Train keypoints network')
+
+    parser.add_argument('--labels_dir',
+                        help='Directory of the .json file containing the test labels',
+                        type=str,
+                        default='')
+    parser.add_argument('--images_dir',
+                        help='Directory of containing the .jpg test images',
+                        type=str,
+                        default='')
+
+    args = parser.parse_args()
+    return args
+
+def main():
+    args = parse_args()
+
+    if args.labels_dir:
+        TEST_LABELS_DIR = args.labels_dir
+
+    if args.images_dir:
+        TEST_IMAGES_DIR = args.images_dir
+
+
+if __name__ == '__main__':
+    main()
 
 class OriginalImage:
 
@@ -187,7 +221,7 @@ def detect_ROI(source='inference/images/', Opt=Opt):
 
     xyxy_norm_matr = npa([])  # Bounding Box prediction
     probabilities = []        # Confidence score
-    for path, img, im0s, vid_cap in dataset:
+    for path, img, im0, vid_cap in dataset:
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -275,7 +309,7 @@ def detect_ROI(source='inference/images/', Opt=Opt):
                 if detection_from_center_crop:
                     ref_shape_scale = crop_after_fail_shape
                 else:
-                    ref_shape_scale = im0s.shape
+                    ref_shape_scale = im0.shape
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], ref_shape_scale).round()
 
                 # Write results
@@ -297,9 +331,17 @@ def detect_ROI(source='inference/images/', Opt=Opt):
                 if show_crop or save_crop:
                     img_ROI = img_orig.get_cropped_ROI(xyxy)
 
+
+
                 probabilities.append(conf)
                 xyxy_norm = npa(xyxy) / npa([img_orig.w, img_orig.h, img_orig.w, img_orig.h])
 
+        if Opt.save_out:
+            label = '%.1f%%' % (100*conf)
+            bgr_bb_color = [0, 215, 255]  # i.e. CSS 'gold' color
+            plot_one_box(xyxy, im0, color=bgr_bb_color, label=label, line_thickness=3)
+            img_name = os.path.basename(path)
+            cv2.imwrite(os.path.join(out_dir,img_name), im0)
 
         # Stack BB predictions
         if len(xyxy_norm_matr) > 0:
@@ -340,12 +382,71 @@ model = attempt_load(Opt.weights, map_location=device)  # load FP32 model
 if False:
     img_dir = 'inference/images/'
     Opt.save_crop = True
+    Opt.save_out = True
     detect_ROI(source=img_dir, Opt=Opt)
+
+
+# INFERENCE MOSAIC
+def inference_mosaic(img_list, img_per_row=3, filename='mosaic.jpg'):
+    mosaic = []
+    row = []
+    count = 0
+
+    for img_name in img_list:
+        count += 1
+
+
+        img = Image.open(os.path.join('inference/output', img_name))
+        if len(row) == 0:
+            row = np.array(img)
+        else:
+            row = np.hstack((row, np.array(img)))
+
+        # whenever the no. images is not a multiple of row length,
+        # just fill with black rectangle
+        if count == len(img_list):  # and len(img_list) % img_per_row:
+            while count % img_per_row:
+                img = Image.new('RGB', (np.array(img).shape[1], np.array(img).shape[0]))
+                row = np.hstack((row, np.array(img)))
+                count += 1
+
+        if not (count % img_per_row):
+            if len(mosaic) == 0:
+                mosaic = row
+            else:
+                mosaic = np.vstack((mosaic, row))
+            row = []
+
+    img_mosaic = Image.fromarray(mosaic)
+    img_mosaic.save(os.path.join(output_dir,filename))
+
+
+inference_image_list = os.listdir('inference/output/')
+
+
+list_real_img = []
+list_blackBG = []
+list_earthBG = []
+
+for filename in inference_image_list:
+    if 'real' in filename:
+        list_real_img.append(filename)
+    elif int( filename.lstrip('img').lstrip('0').rstrip('.jpg') ) < earthBGStart_ID:
+        list_blackBG.append(filename)
+    else:
+        list_earthBG.append(filename)
+
+
+inference_mosaic(list_real_img, 3, 'YOLO/yolo_inference_real.jpg')
+inference_mosaic(list_blackBG, 3, 'YOLO/yolo_inference_blackBG.jpg')
+inference_mosaic(list_earthBG, 3, 'YOLO/yolo_inference_earthBG.jpg')
+
 
 ## Inference on entire TEST set, to save and visualize cropped RoI
 if False:
     img_dir = os.path.join(mySPEED_dir, 'images', 'test')
     Opt.save_crop = True
+    Opt.save_out = False
     detect_ROI(source=img_dir, Opt=Opt)
 
 
@@ -354,7 +455,7 @@ if False:
 Opt.save_crop = False
 
 # Load JSON file with labels of original test set
-with open('../../sharedData/test.json') as jFile:
+with open(TEST_LABELS_DIR) as jFile:
     jData = json.load(jFile)
 
 
@@ -378,7 +479,7 @@ for idx,img in enumerate(jData):
     xyxy_norm_true = [TL[0], TL[1], TL[0]+w, TL[1]+h]
 
     # BB inference
-    img_dir = os.path.join(mySPEED_dir, 'images', 'test', img['filename'])
+    img_dir = os.path.join(TEST_IMAGES_DIR, img['filename'])
     xyxy_norm_inf, confidence, runtime = detect_ROI(source=img_dir, Opt=Opt)
 
     xyxy_inf = npa(xyxy_norm_inf * [Camera.nu, Camera.nv, Camera.nu, Camera.nv], dtype=int)
@@ -407,7 +508,6 @@ myDict = {
 with open('../../sharedData/' + 'yolov5_test_performance' + '.json', 'w') as fp:
     json.dump(myDict, fp)
 
-# save predicted
 
 
 ## LOAD INFERENCE RESULTS ON TEST DATA AND COMPUTE AP_50_95
@@ -516,7 +616,7 @@ ax = plt.gca()
 
 # Plot successive lines according to custom CMap color ordering
 n_lines = P_50_95.shape[0]
-cmap = plt.cm.plasma
+cmap = rgb_cmap
 color_list = cmap(np.linspace(0.1,0.9,n_lines))
 #manual_color_list = (cycler(color=['r','b','m','g']))
 ax.set_prop_cycle(cycler(color=color_list))
@@ -528,11 +628,11 @@ ax.legend(IoU_tresholds, loc=4, title = 'IoU$_{\mathrm{min}}$')
 
 
 # Close up of upper-right region (Inset Axes)
-axins = zoomed_inset_axes(ax, zoom=5, loc=3) # zoom-factor: 5,   location: | 2  1 |
+axins = zoomed_inset_axes(ax, zoom=6, loc=3) # zoom-factor: 6,   location: | 2  1 |
                                              # (e.g. 3 is lower-left)      | 3  4 |
 axins.set_prop_cycle(cycler(color=color_list))
 axins.plot(R_50_95.T, P_50_95.T, linewidth=1)
-x1, x2, y1, y2 = 0.92, 1.004, 0.96, 1.004  # Crop coordinates
+x1, x2, y1, y2 = 0.95, 1.004, 0.97, 1.003  # Crop coordinates
 axins.set_xlim(x1, x2)
 axins.set_ylim(y1, y2)
 axins.set_xticklabels('')

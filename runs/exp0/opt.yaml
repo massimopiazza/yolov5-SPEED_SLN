@@ -19,7 +19,7 @@ name: ''
 device: ''
 multi_scale: false
 single_cls: false
-adam: false
+adam: false  # By default uses Stochastic GD
 sync_bn: false
 local_rank: -1
 logdir: runs/
