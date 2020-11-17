@@ -290,7 +290,7 @@ def detect_ROI(source='inference/images/', Opt=Opt):
 
             lower_thresholds = np.arange(Opt.conf_thres-.1, .3, -.1)
             count = -1
-            while pred[0] is None:
+            while (pred[0] is None) and count < len(lower_thresholds)-1:
                 count += 1
                 pred = model(img, augment=Opt.augment)[0]  # raw prediction (i.e. before NMS)
                 pred = non_max_suppression(pred, lower_thresholds[count], Opt.iou_thres,
