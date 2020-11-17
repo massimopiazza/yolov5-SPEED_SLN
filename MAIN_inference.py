@@ -114,6 +114,8 @@ def main():
 if __name__ == '__main__':
     TEST_LABELS_DIR, TEST_IMAGES_DIR = main()
 
+TEST_LABELS_DIR = '../../sharedData/rendezvous_labels.json'
+TEST_IMAGES_DIR = '../../Rendering/rendezvous_render/frames/movie'
 
 # Load JSON file with labels of original test set
 with open(TEST_LABELS_DIR) as jFile:
@@ -290,8 +292,10 @@ def detect_ROI(source='inference/images/', Opt=Opt):
             count = -1
             while pred[0] is None:
                 count += 1
+                pred = model(img, augment=Opt.augment)[0]  # raw prediction (i.e. before NMS)
                 pred = non_max_suppression(pred, lower_thresholds[count], Opt.iou_thres,
                                            classes=Opt.classes, agnostic=Opt.agnostic_nms)
+
 
             # If there is still no detection by YOLO, Landmark Regression Network
             # should in principle process the entire image, but given that such
@@ -480,7 +484,7 @@ Opt.save_crop = False
 iou_test = []
 prob_test = []
 inference_data = []
-for idx,img in enumerate(test_labels):
+for idx,img in enumerate(test_labels[270:290]):
     # True BB label
     bb_true = img['bounding_box']
     TL = bb_true['TL']
