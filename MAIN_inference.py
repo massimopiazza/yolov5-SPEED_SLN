@@ -48,6 +48,7 @@ from utils_various import *
 
 
 output_dir = '../../06 Output'
+OUTPUT_TAG = ''
 
 class Opt:
     agnostic_nms = False
@@ -98,21 +99,25 @@ def main():
 
     if args.labels_dir:
         TEST_LABELS_DIR = args.labels_dir
+        OUTPUT_TAG = RENDERING_TAG
     else:
         # Default directory
         TEST_LABELS_DIR = '../../sharedData/test.json'
+        OUTPUT_TAG = ''
 
     if args.images_dir:
         TEST_IMAGES_DIR = args.images_dir
+        OUTPUT_TAG = RENDERING_TAG
     else:
         # Default directory
         TEST_IMAGES_DIR = os.path.join(mySPEED_dir, 'images', 'test')
+        OUTPUT_TAG = ''
 
-    return TEST_LABELS_DIR, TEST_IMAGES_DIR
+    return TEST_LABELS_DIR, TEST_IMAGES_DIR, OUTPUT_TAG
 
 
 if __name__ == '__main__':
-    TEST_LABELS_DIR, TEST_IMAGES_DIR = main()
+    TEST_LABELS_DIR, TEST_IMAGES_DIR, OUTPUT_TAG = main()
 
 # TEST_LABELS_DIR = '../../sharedData/rendezvous_labels.json'
 # TEST_IMAGES_DIR = '../../Rendering/rendezvous_render/frames/movie'
@@ -305,7 +310,7 @@ def detect_ROI(source='inference/images/', Opt=Opt):
             # it is very likely thar LRN would fail at detecting landmarks from a very
             # small target from an image that also gets downscaled to 260 x 416 pixels.
             if pred[0] is None:
-                xyxy_norm = npa([0.35 * Camera.nu, 0.35 * Camera.nv, 0.3 * Camera.nu, 0.3 * Camera.nv])
+                xyxy_norm = .5 + npa([-416/2/1920,-416/2/1200, +416/2/1920,+416/2/1200])
                 probabilities.append(0)
                 warnings.warn('No BB detected in %s, we just hope SC is inside xyxy-box: %s'
                               % (path, str(xyxy_norm)))
@@ -340,6 +345,7 @@ def detect_ROI(source='inference/images/', Opt=Opt):
                                                     # was successful (i.e. pred != None), then we need to transform the
                                                     # coordinates of BB-prediction @ cropped to coordinates @ full-image
                         xyxy = (npa(xyxy) + npa([crop_xyxy[0], crop_xyxy[1], crop_xyxy[0], crop_xyxy[1]])).tolist()
+
                     if len(det) > 1:
                         print('%i DETECTIONS:' % len(det))
                         print(path, conf, xyxy)
@@ -360,6 +366,8 @@ def detect_ROI(source='inference/images/', Opt=Opt):
             plot_one_box(xyxy, im0, color=bgr_bb_color, label=label, line_thickness=3)
             img_name = os.path.basename(path)
             cv2.imwrite(os.path.join(out_dir,img_name), im0)
+
+        print(xyxy_norm)
 
         # Stack BB predictions
         if len(xyxy_norm_matr) > 0:
@@ -511,7 +519,7 @@ for idx,img in enumerate(test_labels):
     prob_test.append(confidence[0])
 
 # save BB predictions (inference on whole test set)
-with open('../../sharedData/' + 'yolov5_inference' + '.json', 'w') as fp:
+with open('../../sharedData/' + 'yolov5_inference' + OUTPUT_TAG + '.json', 'w') as fp:
     json.dump(inference_data, fp)
 
 # save IoU and confidence of individual test images
@@ -519,7 +527,7 @@ myDict = {
     'iou': iou_test,
     'probabilities': prob_test
 }
-with open('../../sharedData/' + 'yolov5_test_performance' + '.json', 'w') as fp:
+with open('../../sharedData/' + 'yolov5_test_performance' + OUTPUT_TAG + '.json', 'w') as fp:
     json.dump(myDict, fp)
 
 
@@ -527,7 +535,7 @@ with open('../../sharedData/' + 'yolov5_test_performance' + '.json', 'w') as fp:
 ## LOAD INFERENCE RESULTS ON TEST DATA AND COMPUTE AP_50_95
 
 # Load performance results on test set
-with open('../../sharedData/yolov5_test_performance.json') as jFile:
+with open('../../sharedData/yolov5_test_performance' + OUTPUT_TAG + '.json') as jFile:
     myDict = json.load(jFile)
 iou_test = npa(myDict['iou']).squeeze()
 prob_test = npa(myDict['probabilities']).squeeze()
@@ -608,7 +616,7 @@ myDict['r_50_95']  = R_50_95.tolist()
 myDict['f1_50_95'] = F1_50_95.tolist()
 
 # Save performance parameters
-with open('../../sharedData/' + 'yolov5_test_performance' + '.json', 'w') as fp:
+with open('../../sharedData/' + 'yolov5_test_performance' + OUTPUT_TAG + '.json', 'w') as fp:
     json.dump(myDict, fp)
 
 
@@ -617,7 +625,7 @@ with open('../../sharedData/' + 'yolov5_test_performance' + '.json', 'w') as fp:
 ## Plot inference performance: P(R) curves
 
 
-with open('../../sharedData/yolov5_test_performance.json') as jFile:
+with open('../../sharedData/yolov5_test_performance' + OUTPUT_TAG + '.json') as jFile:
     test_labels = json.load(jFile)
 AP_50_95, P_50_95, R_50_95, F1_50_95 = npa(test_labels['ap_50_95']), npa(test_labels['p_50_95']), npa(test_labels['r_50_95']), npa(test_labels['f1_50_95'])
 
