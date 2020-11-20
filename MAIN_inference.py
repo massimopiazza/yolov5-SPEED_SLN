@@ -310,7 +310,7 @@ def detect_ROI(source='inference/images/', Opt=Opt):
             # it is very likely thar LRN would fail at detecting landmarks from a very
             # small target from an image that also gets downscaled to 260 x 416 pixels.
             if pred[0] is None:
-                xyxy_norm = .5 + npa([-416/2/1920,-416/2/1200, +416/2/1920,+416/2/1200])
+                xyxy_norm = .5 + .5*Opt.img_size / npa([-Camera.nu ,-Camera.nv, +Camera.nu,+Camera.nv])
                 probabilities.append(0)
                 warnings.warn('No BB detected in %s, we just hope SC is inside xyxy-box: %s'
                               % (path, str(xyxy_norm)))
@@ -367,7 +367,6 @@ def detect_ROI(source='inference/images/', Opt=Opt):
             img_name = os.path.basename(path)
             cv2.imwrite(os.path.join(out_dir,img_name), im0)
 
-        print(xyxy_norm)
 
         # Stack BB predictions
         if len(xyxy_norm_matr) > 0:
