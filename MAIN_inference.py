@@ -492,12 +492,6 @@ iou_test = []
 prob_test = []
 inference_data = []
 for idx,img in enumerate(test_labels):
-    # True BB label
-    bb_true = img['bounding_box']
-    TL = bb_true['TL']
-    w = bb_true['w']
-    h = bb_true['h']
-    xyxy_norm_true = [TL[0], TL[1], TL[0]+w, TL[1]+h]
 
     # BB inference
     img_dir = os.path.join(TEST_IMAGES_DIR, img['filename'])
@@ -511,11 +505,22 @@ for idx,img in enumerate(test_labels):
     if not idx % 10:
         print('BB inference on %i/%i images' % (idx, len(test_labels)), end='\r')
 
-
-    # Compute IoU
-    iou_test.append( iou(xyxy_norm_true, xyxy_norm_inf) )
-
     prob_test.append(confidence[0])
+
+
+    try:
+        # True BB label
+        bb_true = img['bounding_box']
+        TL = bb_true['TL']
+        w = bb_true['w']
+        h = bb_true['h']
+        xyxy_norm_true = [TL[0], TL[1], TL[0]+w, TL[1]+h]
+
+        # Compute IoU
+        iou_test.append( iou(xyxy_norm_true, xyxy_norm_inf) )
+    except Exception:
+        pass
+
 
 # save BB predictions (inference on whole test set)
 with open('../../sharedData/' + 'yolov5_inference' + OUTPUT_TAG + '.json', 'w') as fp:
