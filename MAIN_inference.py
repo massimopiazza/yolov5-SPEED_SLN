@@ -119,14 +119,16 @@ def main():
 if __name__ == '__main__':
     TEST_LABELS_DIR, TEST_IMAGES_DIR, OUTPUT_TAG = main()
 
-# TEST_LABELS_DIR = '../../sharedData/rendezvous_labels.json'
-# TEST_IMAGES_DIR = '../../Rendering/rendezvous_render/frames/movie'
+# TEST_LABELS_DIR = '../../sharedData/test_rendering.json'
+# TEST_IMAGES_DIR = '../../Rendering/rendezvous_render/frames/black_bg/noisy'
 
 # Load JSON file with labels of original test set
 with open(TEST_LABELS_DIR) as jFile:
     test_labels = json.load(jFile)
 
 
+if OUTPUT_TAG == RENDERING_TAG:
+    output_dir = os.path.join(output_dir, OUTPUT_TAG[1:])
 
 
 
