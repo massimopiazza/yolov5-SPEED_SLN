@@ -457,7 +457,6 @@ list_blackBG = []
 list_earthBG = []
 
 for filename in inference_image_list:
-    print('AAAAA: ' + filename)
 
     if 'img' in filename:
         if 'real' in filename:
