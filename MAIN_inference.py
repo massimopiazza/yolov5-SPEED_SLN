@@ -457,12 +457,15 @@ list_blackBG = []
 list_earthBG = []
 
 for filename in inference_image_list:
-    if 'real' in filename:
-        list_real_img.append(filename)
-    elif int( filename.lstrip('img').lstrip('0').rstrip('.jpg') ) < earthBGStart_ID:
-        list_blackBG.append(filename)
-    else:
-        list_earthBG.append(filename)
+    print('AAAAA: ' + filename)
+
+    if 'img' in filename:
+        if 'real' in filename:
+            list_real_img.append(filename)
+        elif int( filename.lstrip('img').lstrip('0').rstrip('.jpg') ) < earthBGStart_ID:
+            list_blackBG.append(filename)
+        else:
+            list_earthBG.append(filename)
 
 
 inference_mosaic(list_real_img, 3, 'YOLO/yolo_inference_real.jpg')
