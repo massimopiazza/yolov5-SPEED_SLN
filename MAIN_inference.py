@@ -78,14 +78,18 @@ crop_xyxy = npa([(1 - crop_factor) / 2 * Camera.nu, (1 - crop_factor) / 2 * Came
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Train keypoints network')
+    parser = argparse.ArgumentParser(description='YOLOv5')
 
     parser.add_argument('--labels_dir',
                         help='Directory of the .json file containing the test labels',
                         type=str,
                         default='')
     parser.add_argument('--images_dir',
-                        help='Directory of containing the .jpg test images',
+                        help='Directory containing the .jpg test images',
+                        type=str,
+                        default='')
+    parser.add_argument('--output_tag',
+                        help='Text label to append to inference .json output file',
                         type=str,
                         default='')
 
@@ -99,19 +103,22 @@ def main():
 
     if args.labels_dir:
         TEST_LABELS_DIR = args.labels_dir
-        OUTPUT_TAG = RENDERING_TAG
     else:
         # Default directory
         TEST_LABELS_DIR = '../../sharedData/test.json'
-        OUTPUT_TAG = ''
 
     if args.images_dir:
         TEST_IMAGES_DIR = args.images_dir
-        OUTPUT_TAG = RENDERING_TAG
     else:
         # Default directory
         TEST_IMAGES_DIR = os.path.join(mySPEED_dir, 'images', 'test')
+
+    if args.output_tag:
+        OUTPUT_TAG = args.output_tag
+    else:
+        # Default empty tag
         OUTPUT_TAG = ''
+
 
     return TEST_LABELS_DIR, TEST_IMAGES_DIR, OUTPUT_TAG
 
@@ -409,6 +416,7 @@ model = attempt_load(Opt.weights, map_location=device)  # load FP32 model
 ## Inference on a few EXAMPLES
 if False:
     img_dir = 'inference/images/'
+    #img_dir = os.path.join(TEST_IMAGES_DIR)
     Opt.save_crop = True
     Opt.save_out = True
     detect_ROI(source=img_dir, Opt=Opt)
@@ -499,6 +507,8 @@ for idx,img in enumerate(test_labels):
 
     # BB inference
     img_dir = os.path.join(TEST_IMAGES_DIR, img['filename'])
+
+
     xyxy_norm_inf, confidence, runtime = detect_ROI(source=img_dir, Opt=Opt)
 
     xyxy_inf = npa(xyxy_norm_inf * [Camera.nu, Camera.nv, Camera.nu, Camera.nv], dtype=int)
