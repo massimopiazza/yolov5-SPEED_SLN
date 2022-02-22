@@ -298,6 +298,7 @@ def detect_ROI(source='inference/images/', Opt=Opt):
 
             # Inference
             pred = model(img, augment=Opt.augment)[0]  # raw prediction (i.e. before NMS)
+
             # NMS
             pred = non_max_suppression(pred, Opt.conf_thres, Opt.iou_thres, classes=Opt.classes,
                                        agnostic=Opt.agnostic_nms)

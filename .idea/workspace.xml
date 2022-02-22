@@ -19,9 +19,80 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="39f9b0a4-a524-4cad-90e0-e5166adbcfcb" name="Default Changelist" comment="Updated">
+    <list default="true" id="39f9b0a4-a524-4cad-90e0-e5166adbcfcb" name="Default Changelist" comment="Fixes">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/yolov5-SPEED_SLN.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/yolov5-SPEED_SLN.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MAIN_inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/MAIN_inference.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/coco.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/coco.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/coco128.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/coco128.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hyp.finetune.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/hyp.finetune.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hyp.scratch.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/hyp.scratch.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/scripts/get_voc.sh" beforeDir="false" afterPath="$PROJECT_DIR$/data/scripts/get_voc.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/speed_mp.yml" beforeDir="false" afterPath="$PROJECT_DIR$/data/speed_mp.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/voc.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/data/voc.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/detect.py" beforeDir="false" afterPath="$PROJECT_DIR$/detect.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hubconf.py" beforeDir="false" afterPath="$PROJECT_DIR$/hubconf.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000007real.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000007real.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000025.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000025.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000038.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000038.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000047real.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000047real.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000058.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000058.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000128.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000128.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000184real.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000184real.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000213real.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000213real.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000217.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000217.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000439real.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000439real.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img000588real.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img000588real.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img001588.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img001588.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img007601.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img007601.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img007628.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img007628.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img007645.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img007645.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img007710.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img007710.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img007871.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img007871.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img007879.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img007879.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img008758.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img008758.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img008808.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img008808.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img012219.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img012219.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img013462.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img013462.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img014926.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img014926.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inference/images/img014991.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/inference/images/img014991.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/experimental.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/experimental.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/export.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/export.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/hub/yolov3-spp.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/models/hub/yolov3-spp.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/hub/yolov5-fpn.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/models/hub/yolov5-fpn.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/hub/yolov5-panet.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/models/hub/yolov5-panet.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/yolo.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/yolo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/yolov5l.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/models/yolov5l.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/yolov5m.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/models/yolov5m.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/yolov5s.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/models/yolov5s.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/yolov5x.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/models/yolov5x.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/events.out.tfevents.1600415460.af35d2b59071.372.0" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/events.out.tfevents.1600415460.af35d2b59071.372.0" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/hyp.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/hyp.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/labels.png" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/labels.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/opt.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/opt.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/results.png" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/results.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/results.txt" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/results.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/test_batch0_gt.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/test_batch0_gt.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/test_batch0_pred.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/test_batch0_pred.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/train_batch0.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/train_batch0.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/train_batch1.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/train_batch1.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/train_batch2.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/train_batch2.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/weights/best.pt" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/weights/best.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/exp0/weights/last.pt" beforeDir="false" afterPath="$PROJECT_DIR$/runs/exp0/weights/last.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/activations.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/activations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/google_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/google_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/torch_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/torch_utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -154,7 +225,42 @@
       <option name="project" value="LOCAL" />
       <updated>1611143140647</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Updated">
+      <created>1611143413243</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1611143413243</updated>
+    </task>
+    <task id="LOCAL-00010" summary="fixes">
+      <created>1632911023803</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1632911023803</updated>
+    </task>
+    <task id="LOCAL-00011" summary="fixes">
+      <created>1632911121160</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1632911121160</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Updated requirements.txt file">
+      <created>1632922259192</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1632922259192</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Fixes">
+      <created>1639582105013</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1639582105013</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -171,6 +277,9 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Updated" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated" />
+    <MESSAGE value="fixes" />
+    <MESSAGE value="Updated requirements.txt file" />
+    <MESSAGE value="Fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixes" />
   </component>
 </project>
