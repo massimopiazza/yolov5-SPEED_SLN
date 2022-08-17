@@ -1,0 +1,12 @@
+# download command/URL (optional)
+# download: https://drive.google.com/drive/folders/1w7cVK9zsGlbE_Vq69ewaVnFo7iL9jiOq?usp=sharing
+
+# train and val data as 1) directory: path/images/, 2) file: path/images.txt, or 3) list: [path1/images/, path2/images/]
+train: /content/gdrive/My Drive/220816CnnDataset/images/train
+val: /content/gdrive/My Drive/220816CnnDataset/images/dev
+
+# number of classes
+nc: 1
+
+# class names
+names: ['measat']
