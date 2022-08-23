@@ -346,6 +346,7 @@ def detect_ROI(source='inference/images/', Opt=Opt):
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], ref_shape_scale).round()
 
                 # Write results
+                conf = 0.0 # initialize to zero in the event of no class detected
                 for *xyxy, conf, cls in reversed(det):
                     # xywh_norm = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                     xyxy = torch.tensor(xyxy).tolist()
